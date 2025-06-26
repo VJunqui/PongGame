@@ -5,20 +5,17 @@ import random
 pygame.init()
 pygame.mixer.init()
 try:
-    pygame.mixer.music.load("sounds/8bitmusic.mp3")  # substitua pelo nome do seu arquivo
-    pygame.mixer.music.play(-1)  # -1 para tocar em loop infinito
+    pygame.mixer.music.load("sounds/8bitmusic.mp3") 
+    pygame.mixer.music.play(-1)  
 except pygame.error as e:
     print(f"Erro ao carregar música: {e}")
 
-# Tamanho da tela
 largura, altura = 800, 600
 tela = pygame.display.set_mode((largura, altura))
 pygame.display.set_caption("Pong v0.4")
 
-# Fonte
 fonte = pygame.font.SysFont("Arial", 36)
 
-# Cores personalizadas
 COR_FUNDO = (30, 30, 60)
 COR_RAQUETE_1 = (255, 100, 100)
 COR_RAQUETE_2 = (100, 255, 100)
