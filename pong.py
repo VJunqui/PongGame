@@ -4,14 +4,26 @@ import random
 
 # Inicialização
 pygame.init()
+pygame.mixer.init()  # Inicializa o mixer de áudio
+
+try:
+    pygame.mixer.music.load("sounds/8bitmusic.mp3")  # substitua pelo nome do seu arquivo
+    pygame.mixer.music.play(-1)  # -1 para tocar em loop infinito
+except pygame.error as e:
+    print(f"Erro ao carregar música: {e}")
+
 largura, altura = 800, 600
 tela = pygame.display.set_mode((largura, altura))
-pygame.display.set_caption("Pong com IA e Dificuldades")
+pygame.display.set_caption("Pong com IA, Dificuldades e Cores")
 fonte = pygame.font.SysFont("Arial", 36)
 
-# Cores
-BRANCO = (255, 255, 255)
-PRETO = (0, 0, 0)
+# Definindo cores personalizadas (RGB)
+COR_FUNDO = (30, 30, 60)          # Fundo azul escuro
+COR_RAQUETE_1 = (255, 100, 100)  # Raquete jogador 1 vermelho claro
+COR_RAQUETE_2 = (100, 255, 100)  # Raquete IA verde claro
+COR_BOLA = (255, 255, 0)          # Bola amarela
+COR_LINHA = (200, 200, 200)       # Linha central cinza clara
+COR_TEXTO = (255, 255, 255)       # Texto branco
 
 # Tamanhos
 raquete_largura = 10
@@ -21,13 +33,13 @@ bola_tamanho = 20
 # Menu de dificuldade
 def exibir_menu():
     while True:
-        tela.fill(PRETO)
-        titulo = fonte.render("PONG - Selecione a Dificuldade", True, BRANCO)
-        facil = fonte.render("1 - Fácil", True, BRANCO)
-        medio = fonte.render("2 - Médio", True, BRANCO)
-        dificil = fonte.render("3 - Difícil", True, BRANCO)
-        muito_dificil = fonte.render("4 - Muito Difícil", True, BRANCO)
-        sair = fonte.render("ESC - Sair", True, BRANCO)
+        tela.fill(COR_FUNDO)
+        titulo = fonte.render("PONG - Selecione a Dificuldade", True, COR_TEXTO)
+        facil = fonte.render("1 - Fácil", True, COR_TEXTO)
+        medio = fonte.render("2 - Médio", True, COR_TEXTO)
+        dificil = fonte.render("3 - Difícil", True, COR_TEXTO)
+        muito_dificil = fonte.render("4 - Muito Difícil", True, COR_TEXTO)
+        sair = fonte.render("ESC - Sair", True, COR_TEXTO)
 
         tela.blit(titulo, (largura//2 - titulo.get_width()//2, 100))
         tela.blit(facil, (largura//2 - facil.get_width()//2, 200))
@@ -98,7 +110,7 @@ def jogar(config):
         if bola_y <= 0 or bola_y >= altura - bola_tamanho:
             bola_vel_y *= -1
 
-        # Colisão com as raquetes
+        # Colisão com raquetes
         if bola_x <= 10 + raquete_largura and player1_y < bola_y + bola_tamanho and bola_y < player1_y + raquete_altura:
             bola_vel_x *= -1
         if bola_x + bola_tamanho >= largura - 20 and player2_y < bola_y + bola_tamanho and bola_y < player2_y + raquete_altura:
@@ -119,13 +131,14 @@ def jogar(config):
             bola_vel_y = random.choice([-1, 1]) * config['bola']
 
         # Desenhar
-        tela.fill(PRETO)
-        pygame.draw.rect(tela, BRANCO, (10, player1_y, raquete_largura, raquete_altura))
-        pygame.draw.rect(tela, BRANCO, (largura - 20, player2_y, raquete_largura, raquete_altura))
-        pygame.draw.ellipse(tela, BRANCO, (bola_x, bola_y, bola_tamanho, bola_tamanho))
-        pygame.draw.aaline(tela, BRANCO, (largura // 2, 0), (largura // 2, altura))
-        placar = fonte.render(f"{pontos1}   {pontos2}", True, BRANCO)
+        tela.fill(COR_FUNDO)
+        pygame.draw.rect(tela, COR_RAQUETE_1, (10, player1_y, raquete_largura, raquete_altura))
+        pygame.draw.rect(tela, COR_RAQUETE_2, (largura - 20, player2_y, raquete_largura, raquete_altura))
+        pygame.draw.ellipse(tela, COR_BOLA, (bola_x, bola_y, bola_tamanho, bola_tamanho))
+        pygame.draw.aaline(tela, COR_LINHA, (largura // 2, 0), (largura // 2, altura))
+        placar = fonte.render(f"{pontos1}   {pontos2}", True, COR_TEXTO)
         tela.blit(placar, (largura // 2 - placar.get_width() // 2, 20))
+
         pygame.display.flip()
         clock.tick(60)
 
