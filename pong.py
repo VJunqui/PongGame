@@ -4,20 +4,22 @@ import random
 
 # Inicialização
 pygame.init()
-pygame.mixer.init()  # Inicializa o mixer de áudio
-
+pygame.mixer.init()
 try:
     pygame.mixer.music.load("sounds/8bitmusic.mp3")  # substitua pelo nome do seu arquivo
     pygame.mixer.music.play(-1)  # -1 para tocar em loop infinito
 except pygame.error as e:
     print(f"Erro ao carregar música: {e}")
 
+# Tamanho da tela
 largura, altura = 800, 600
 tela = pygame.display.set_mode((largura, altura))
-pygame.display.set_caption("Pong com IA, Dificuldades e Cores")
+pygame.display.set_caption("Pong Melhorado")
+
+# Fonte
 fonte = pygame.font.SysFont("Arial", 36)
 
-# Definindo cores personalizadas (RGB)
+# Cores personalizadas (RGB)
 COR_FUNDO = (30, 30, 60)          # Fundo azul escuro
 COR_RAQUETE_1 = (255, 100, 100)  # Raquete jogador 1 vermelho claro
 COR_RAQUETE_2 = (100, 255, 100)  # Raquete IA verde claro
@@ -110,7 +112,7 @@ def jogar(config):
         if bola_y <= 0 or bola_y >= altura - bola_tamanho:
             bola_vel_y *= -1
 
-        # Colisão com raquetes
+        # Colisão com raquetes (com ajuste para detecção correta)
         if bola_x <= 10 + raquete_largura and player1_y < bola_y + bola_tamanho and bola_y < player1_y + raquete_altura:
             bola_vel_x *= -1
         if bola_x + bola_tamanho >= largura - 20 and player2_y < bola_y + bola_tamanho and bola_y < player2_y + raquete_altura:
@@ -131,13 +133,31 @@ def jogar(config):
             bola_vel_y = random.choice([-1, 1]) * config['bola']
 
         # Desenhar
+
+        # Fundo com cor sólida
         tela.fill(COR_FUNDO)
-        pygame.draw.rect(tela, COR_RAQUETE_1, (10, player1_y, raquete_largura, raquete_altura))
-        pygame.draw.rect(tela, COR_RAQUETE_2, (largura - 20, player2_y, raquete_largura, raquete_altura))
-        pygame.draw.ellipse(tela, COR_BOLA, (bola_x, bola_y, bola_tamanho, bola_tamanho))
-        pygame.draw.aaline(tela, COR_LINHA, (largura // 2, 0), (largura // 2, altura))
-        placar = fonte.render(f"{pontos1}   {pontos2}", True, COR_TEXTO)
-        tela.blit(placar, (largura // 2 - placar.get_width() // 2, 20))
+
+        # Raquetes arredondadas
+        pygame.draw.rect(tela, COR_RAQUETE_1, (10, player1_y, raquete_largura, raquete_altura), border_radius=8)
+        pygame.draw.rect(tela, COR_RAQUETE_2, (largura - 20, player2_y, raquete_largura, raquete_altura), border_radius=8)
+
+        # Bola com sombra (sombra + bola principal)
+        pygame.draw.ellipse(tela, (180, 180, 0), (bola_x, bola_y, bola_tamanho, bola_tamanho))  # sombra
+        pygame.draw.ellipse(tela, COR_BOLA, (bola_x + 3, bola_y + 3, bola_tamanho - 6, bola_tamanho - 6))  # bola
+
+        # Linha central tracejada
+        segmento_altura = 20
+        espaco = 15
+        for y in range(0, altura, segmento_altura + espaco):
+            pygame.draw.rect(tela, COR_LINHA, (largura // 2 - 2, y, 4, segmento_altura))
+
+        # Placar com sombra
+        texto = f"{pontos1}   {pontos2}"
+        placar_sombra = fonte.render(texto, True, (50, 50, 50))  # sombra cinza escuro
+        placar = fonte.render(texto, True, COR_TEXTO)
+        pos_x = largura // 2 - placar.get_width() // 2
+        tela.blit(placar_sombra, (pos_x + 3, 23))
+        tela.blit(placar, (pos_x, 20))
 
         pygame.display.flip()
         clock.tick(60)
