@@ -13,7 +13,7 @@ except pygame.error as e:
 # Tamanho da tela
 largura, altura = 800, 600
 tela = pygame.display.set_mode((largura, altura))
-pygame.display.set_caption("Pong v0.3")
+pygame.display.set_caption("Pong v0.4")
 
 # Fonte
 fonte = pygame.font.SysFont("Arial", 36)
@@ -79,20 +79,83 @@ def exibir_menu(titulo, opcoes):
                         return opcoes[escolha][1]
 
 def exibir_vitoria(vencedor):
-    while True:
-        tela.fill(COR_FUNDO)
-        texto = fonte.render(f"{vencedor} venceu!", True, COR_TEXTO)
-        subtexto = fonte.render("Pressione qualquer tecla para voltar ao menu", True, COR_TEXTO)
-        tela.blit(texto, (largura // 2 - texto.get_width() // 2, 250))
-        tela.blit(subtexto, (largura // 2 - subtexto.get_width() // 2, 320))
-        pygame.display.flip()
+    class Fogo:
+        def __init__(self):
+            self.x = random.randint(100, largura - 100)
+            self.y = random.randint(100, altura - 200)
+            self.particles = []
+            self.gerar_particulas()
 
+        def gerar_particulas(self):
+            for _ in range(30):
+                angulo = random.uniform(0, 2 * math.pi)
+                velocidade = random.uniform(1, 5)
+                vx = math.cos(angulo) * velocidade
+                vy = math.sin(angulo) * velocidade
+                cor = random.choice([
+                    (255, 100, 100),
+                    (100, 255, 100),
+                    (100, 100, 255),
+                    (255, 255, 100),
+                    (255, 100, 255),
+                    (100, 255, 255),
+                ])
+                self.particles.append({
+                    'x': self.x,
+                    'y': self.y,
+                    'vx': vx,
+                    'vy': vy,
+                    'life': 60,
+                    'cor': cor
+                })
+
+        def update(self):
+            for p in self.particles:
+                p['x'] += p['vx']
+                p['y'] += p['vy']
+                p['life'] -= 1
+
+        def draw(self, surface):
+            for p in self.particles:
+                if p['life'] > 0:
+                    pygame.draw.circle(surface, p['cor'], (int(p['x']), int(p['y'])), 3)
+
+        def acabou(self):
+            return all(p['life'] <= 0 for p in self.particles)
+
+    import math
+    fogos = []
+    tempo = 0
+    clock = pygame.time.Clock()
+
+    while True:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if evento.type == pygame.KEYDOWN:
                 return
+
+        if tempo % 30 == 0:
+            fogos.append(Fogo())
+
+        for f in fogos:
+            f.update()
+
+        fogos = [f for f in fogos if not f.acabou()]
+
+        tela.fill(COR_FUNDO)
+        texto = fonte.render(f"{vencedor} venceu!", True, COR_TEXTO)
+        subtexto = fonte.render("Pressione qualquer tecla para voltar ao menu", True, COR_TEXTO)
+        tela.blit(texto, (largura // 2 - texto.get_width() // 2, 220))
+        tela.blit(subtexto, (largura // 2 - subtexto.get_width() // 2, 300))
+
+        for f in fogos:
+            f.draw(tela)
+
+        pygame.display.flip()
+        clock.tick(60)
+        tempo += 1
 
 def jogar(config, max_pontos):
     player1_y = altura // 2 - raquete_altura // 2
